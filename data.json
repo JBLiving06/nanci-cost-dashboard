@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-05-16T00:00:00.000Z",
+  "monthly_ceiling_usd": 500,
+  "monthly_alert_ratio": 0.80,
+  "month_to_date": {
+    "monthStart": "2026-05-01",
+    "today": "2026-05-16",
+    "mtdUsd": 0,
+    "ratio": 0,
+    "tripped": false,
+    "byVendor": { "anthropic": 0, "elevenlabs": 0, "twilio": 0, "other": 0 }
+  },
+  "daily": [],
+  "calls_by_day": [],
+  "_note": "Placeholder. Real data lands once ct_publishDashboardJson runs from GAS."
+}

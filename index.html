@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nanci · Cost Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #182028;
+    --border: #243340;
+    --ink: #e5edf2;
+    --ink-dim: #8a99a8;
+    --accent: #6db4ff;
+    --warn: #ffb454;
+    --bad: #ff6e6e;
+    --good: #5ed3a3;
+    --anthropic: #d2876b;
+    --elevenlabs: #b88aff;
+    --twilio: #ff5c6c;
+    --other: #5ed3a3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 24px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  h1 { font-size: 22px; margin: 0; font-weight: 600; }
+  .meta { color: var(--ink-dim); font-size: 13px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .card h2 {
+    margin: 0 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .span-12 { grid-column: span 12; }
+  .span-8  { grid-column: span 8; }
+  .span-6  { grid-column: span 6; }
+  .span-4  { grid-column: span 4; }
+  .span-3  { grid-column: span 3; }
+  @media (max-width: 900px) {
+    .span-8, .span-6, .span-4, .span-3 { grid-column: span 12; }
+  }
+  .ceiling-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .ceiling-amt { font-size: 28px; font-weight: 600; }
+  .ceiling-target { color: var(--ink-dim); font-size: 14px; }
+  .progress {
+    height: 14px;
+    background: #0c1116;
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+  }
+  .progress > div {
+    height: 100%;
+    background: var(--good);
+    border-radius: 999px;
+    transition: width 600ms ease;
+  }
+  .progress.warn > div { background: var(--warn); }
+  .progress.bad > div  { background: var(--bad); }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat .num { font-size: 26px; font-weight: 600; }
+  .stat .lbl { color: var(--ink-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .chart-wrap {
+    position: relative;
+    height: 280px;
+  }
+  .small-chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--ink-dim);
+  }
+  .legend span::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .leg-anthropic::before  { background: var(--anthropic); }
+  .leg-elevenlabs::before { background: var(--elevenlabs); }
+  .leg-twilio::before     { background: var(--twilio); }
+  .leg-other::before      { background: var(--other); }
+  footer {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-align: center;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  .error {
+    background: rgba(255, 110, 110, 0.1);
+    border: 1px solid var(--bad);
+    color: var(--bad);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Nanci · Cost Dashboard</h1>
+    <div class="meta" id="meta">Loading…</div>
+  </div>
+  <div class="meta" id="now"></div>
+</header>
+
+<div id="error" class="error" style="display:none"></div>
+
+<div class="grid">
+  <div class="card span-8">
+    <h2>Daily spend, last 30 days</h2>
+    <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+    <div class="legend">
+      <span class="leg-anthropic">Anthropic</span>
+      <span class="leg-elevenlabs">ElevenLabs</span>
+      <span class="leg-twilio">Twilio</span>
+      <span class="leg-other">Other</span>
+    </div>
+  </div>
+
+  <div class="card span-4">
+    <h2>Month-to-date vs ceiling</h2>
+    <div class="ceiling-row">
+      <span class="ceiling-amt" id="mtdAmt">$0</span>
+      <span class="ceiling-target" id="mtdTarget">/ $500</span>
+    </div>
+    <div class="progress" id="ceilingBar"><div style="width:0%"></div></div>
+    <div class="meta" id="mtdNote" style="margin-top:8px"></div>
+    <div style="margin-top:18px" class="stat">
+      <span class="lbl">Daily burn (this month)</span>
+      <span class="num" id="dailyBurn">$0</span>
+      <span class="meta" id="dailyBurnNote"></span>
+    </div>
+  </div>
+
+  <div class="card span-4">
+    <h2>Vendor breakdown (MTD)</h2>
+    <div class="small-chart-wrap"><canvas id="pieChart"></canvas></div>
+  </div>
+
+  <div class="card span-8">
+    <h2>Calls per day</h2>
+    <div class="small-chart-wrap"><canvas id="callsChart"></canvas></div>
+  </div>
+</div>
+
+<footer>
+  data.json refreshed daily by GAS cost_tracker · source <a href="https://github.com/JBLiving06/nanci-cost-dashboard">JBLiving06/nanci-cost-dashboard</a>
+</footer>
+
+<script>
+const colors = {
+  anthropic:  getCss('--anthropic'),
+  elevenlabs: getCss('--elevenlabs'),
+  twilio:     getCss('--twilio'),
+  other:      getCss('--other'),
+  good:       getCss('--good'),
+  warn:       getCss('--warn'),
+  bad:        getCss('--bad'),
+  inkDim:     getCss('--ink-dim'),
+  border:     getCss('--border'),
+};
+
+function getCss(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function fmtUsd(n) {
+  if (n == null) return '—';
+  return '$' + n.toFixed(2);
+}
+
+document.getElementById('now').textContent =
+  'Viewed ' + new Date().toLocaleString();
+
+// Cache-bust so refreshes pick up the latest commit immediately.
+fetch('./data.json?t=' + Date.now())
+  .then(r => {
+    if (!r.ok) throw new Error('data.json fetch failed: HTTP ' + r.status);
+    return r.json();
+  })
+  .then(render)
+  .catch(err => {
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('error').textContent =
+      'Dashboard data unavailable: ' + err.message +
+      ' — cost_tracker has not published yet, or the publish failed. ' +
+      'Run ct_publishDashboardJson via the GAS web app to push.';
+    document.getElementById('meta').textContent = 'no data';
+  });
+
+function render(data) {
+  const meta = data.generated_at
+    ? 'Updated ' + new Date(data.generated_at).toLocaleString() +
+      '  ·  ' + (data.daily || []).length + ' days of history'
+    : 'No generation timestamp';
+  document.getElementById('meta').textContent = meta;
+
+  const daily = data.daily || [];
+  const mtd = data.month_to_date;
+  const ceilingUsd = data.monthly_ceiling_usd || 500;
+  const alertRatio = data.monthly_alert_ratio || 0.8;
+
+  // ---- Ceiling card ----
+  const mtdAmt = mtd ? mtd.mtdUsd : 0;
+  const ratio = mtdAmt / ceilingUsd;
+  document.getElementById('mtdAmt').textContent = fmtUsd(mtdAmt);
+  document.getElementById('mtdTarget').textContent = '/ ' + fmtUsd(ceilingUsd);
+  const bar = document.getElementById('ceilingBar');
+  bar.querySelector('div').style.width = Math.min(100, ratio * 100) + '%';
+  bar.classList.remove('warn', 'bad');
+  if (ratio >= 1.0) bar.classList.add('bad');
+  else if (ratio >= alertRatio) bar.classList.add('warn');
+  const pct = Math.round(ratio * 100);
+  let note;
+  if (ratio >= 1.0)        note = pct + '% — OVER CEILING';
+  else if (ratio >= alertRatio) note = pct + '% — over ' + Math.round(alertRatio*100) + '% alert threshold';
+  else                     note = pct + '% — within budget';
+  if (mtd) note += '  ·  since ' + fmtDate(mtd.monthStart);
+  document.getElementById('mtdNote').textContent = note;
+
+  // Daily burn: average across days in mtd that have non-zero spend.
+  const today = new Date();
+  const monthDays = today.getDate();
+  const dailyBurn = mtdAmt / Math.max(1, monthDays);
+  document.getElementById('dailyBurn').textContent = fmtUsd(dailyBurn);
+  const projection = dailyBurn * 30;
+  document.getElementById('dailyBurnNote').textContent =
+    'Projected month total: ' + fmtUsd(projection) +
+    (projection > ceilingUsd ? ' (would breach $' + ceilingUsd + ')' : '');
+
+  // ---- Daily line chart ----
+  const labels = daily.map(d => fmtDate(d.date));
+  const ds = (key, color) => ({
+    label: key.charAt(0).toUpperCase() + key.slice(1),
+    data: daily.map(d => d[key]),
+    borderColor: color,
+    backgroundColor: color + '22',
+    tension: 0.25,
+    fill: true,
+    pointRadius: 2,
+    pointHoverRadius: 4
+  });
+  new Chart(document.getElementById('dailyChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        ds('anthropic',  colors.anthropic),
+        ds('elevenlabs', colors.elevenlabs),
+        ds('twilio',     colors.twilio),
+        ds('other',      colors.other)
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: c => c.dataset.label + ': ' + fmtUsd(c.parsed.y) }
+      }},
+      scales: {
+        x: { ticks: { color: colors.inkDim, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: { color: colors.border } },
+        y: { stacked: true, ticks: { color: colors.inkDim, callback: v => '$' + v }, grid: { color: colors.border }, beginAtZero: true }
+      }
+    }
+  });
+
+  // ---- MTD pie ----
+  const bv = (mtd && mtd.byVendor) || { anthropic: 0, elevenlabs: 0, twilio: 0, other: 0 };
+  new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Anthropic', 'ElevenLabs', 'Twilio', 'Other'],
+      datasets: [{
+        data: [bv.anthropic, bv.elevenlabs, bv.twilio, bv.other],
+        backgroundColor: [colors.anthropic, colors.elevenlabs, colors.twilio, colors.other],
+        borderColor: colors.border, borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: colors.inkDim, font: { size: 11 }, padding: 12 } },
+        tooltip: { callbacks: { label: c => c.label + ': ' + fmtUsd(c.parsed) } }
+      }
+    }
+  });
+
+  // ---- Calls per day ----
+  const calls = data.calls_by_day || [];
+  new Chart(document.getElementById('callsChart'), {
+    type: 'bar',
+    data: {
+      labels: calls.map(c => fmtDate(c.date)),
+      datasets: [{
+        label: 'Calls',
+        data: calls.map(c => c.calls),
+        backgroundColor: colors.warn,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: colors.inkDim, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { color: colors.border } },
+        y: { beginAtZero: true, ticks: { color: colors.inkDim, precision: 0 }, grid: { color: colors.border } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
