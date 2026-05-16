@@ -1,20 +1,8 @@
 {
-  "generated_at": "2026-05-16T23:47:47.437Z",
+  "generated_at": "2026-05-16T23:47:53.118Z",
   "monthly_ceiling_usd": 500,
   "monthly_alert_ratio": 0.8,
-  "month_to_date": {
-    "monthStart": "2026-05-01",
-    "today": "2026-05-16",
-    "mtdUsd": 36.18,
-    "ratio": 0.07,
-    "tripped": false,
-    "byVendor": {
-      "anthropic": 0,
-      "elevenlabs": 20.91,
-      "twilio": 15.27,
-      "other": 0
-    }
-  },
+  "month_to_date": null,
   "daily": [],
   "calls_by_day": []
 }
