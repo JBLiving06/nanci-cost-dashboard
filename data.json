@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-06-02T11:21:10.173Z",
+  "generated_at": "2026-06-03T11:21:05.420Z",
   "monthly_ceiling_usd": 500,
   "monthly_alert_ratio": 0.8,
   "month_to_date": {
     "monthStart": "2026-06-01",
-    "today": "2026-06-02",
-    "mtdUsd": 35.55,
-    "ratio": 0.07,
+    "today": "2026-06-03",
+    "mtdUsd": 57.95,
+    "ratio": 0.12,
     "tripped": false,
     "byVendor": {
-      "anthropic": 16.02,
-      "elevenlabs": 19.53,
+      "anthropic": 28.71,
+      "elevenlabs": 29.24,
       "twilio": 0,
       "other": 0
     }
@@ -159,6 +159,14 @@
       "twilio": 0,
       "other": 0,
       "total": 22.44
+    },
+    {
+      "date": "2026-06-03",
+      "anthropic": 18.71,
+      "elevenlabs": 9.71,
+      "twilio": 0,
+      "other": 0,
+      "total": 28.42
     }
   ],
   "calls_by_day": [
