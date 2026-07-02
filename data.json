@@ -1,29 +1,21 @@
 {
-  "generated_at": "2026-07-01T11:21:05.699Z",
+  "generated_at": "2026-07-02T11:21:04.578Z",
   "monthly_ceiling_usd": 500,
   "monthly_alert_ratio": 0.8,
   "month_to_date": {
     "monthStart": "2026-07-01",
-    "today": "2026-07-01",
-    "mtdUsd": 16.99,
-    "ratio": 0.03,
+    "today": "2026-07-02",
+    "mtdUsd": 35.77,
+    "ratio": 0.07,
     "tripped": false,
     "byVendor": {
-      "anthropic": 6.67,
-      "elevenlabs": 10.32,
+      "anthropic": 15.11,
+      "elevenlabs": 20.66,
       "twilio": 0,
       "other": 0
     }
   },
   "daily": [
-    {
-      "date": "2026-05-31",
-      "anthropic": 103,
-      "elevenlabs": 9.67,
-      "twilio": 0,
-      "other": 0,
-      "total": 112.67
-    },
     {
       "date": "2026-06-01",
       "anthropic": 9.35,
@@ -234,43 +226,51 @@
     },
     {
       "date": "2026-06-27",
-      "anthropic": 6.67,
+      "anthropic": 138.05,
       "elevenlabs": 10.88,
       "twilio": 0,
       "other": 0,
-      "total": 17.55
+      "total": 148.93
     },
     {
       "date": "2026-06-28",
-      "anthropic": 6.67,
+      "anthropic": 142.01,
       "elevenlabs": 10.81,
       "twilio": 0,
       "other": 0,
-      "total": 17.48
+      "total": 152.82
     },
     {
       "date": "2026-06-29",
-      "anthropic": 6.67,
+      "anthropic": 144.96,
       "elevenlabs": 10.78,
       "twilio": 0,
       "other": 0,
-      "total": 17.45
+      "total": 155.74
     },
     {
       "date": "2026-06-30",
-      "anthropic": 6.67,
+      "anthropic": 148.69,
       "elevenlabs": 10.28,
       "twilio": 0,
       "other": 0,
-      "total": 16.95
+      "total": 158.97
     },
     {
       "date": "2026-07-01",
-      "anthropic": 6.67,
+      "anthropic": 8.44,
       "elevenlabs": 10.32,
       "twilio": 0,
       "other": 0,
-      "total": 16.99
+      "total": 18.76
+    },
+    {
+      "date": "2026-07-02",
+      "anthropic": 11.16,
+      "elevenlabs": 10.34,
+      "twilio": 0,
+      "other": 0,
+      "total": 21.5
     }
   ],
   "calls_by_day": []
