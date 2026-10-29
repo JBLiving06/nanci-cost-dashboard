@@ -1,29 +1,21 @@
 {
-  "generated_at": "2026-10-28T11:21:05.316Z",
+  "generated_at": "2026-10-29T11:21:09.689Z",
   "monthly_ceiling_usd": 500,
   "monthly_alert_ratio": 0.8,
   "month_to_date": {
     "monthStart": "2026-10-01",
-    "today": "2026-10-28",
-    "mtdUsd": 484.39,
-    "ratio": 0.97,
+    "today": "2026-10-29",
+    "mtdUsd": 537.77,
+    "ratio": 1.08,
     "tripped": true,
     "byVendor": {
-      "anthropic": 481.87,
+      "anthropic": 535.25,
       "elevenlabs": 0,
       "twilio": 2.52,
       "other": 0
     }
   },
   "daily": [
-    {
-      "date": "2026-09-27",
-      "anthropic": 25.31,
-      "elevenlabs": 0,
-      "twilio": 0.06,
-      "other": 0,
-      "total": 25.37
-    },
     {
       "date": "2026-09-28",
       "anthropic": 26.06,
@@ -266,6 +258,14 @@
     },
     {
       "date": "2026-10-28",
+      "anthropic": 53.38,
+      "elevenlabs": 0,
+      "twilio": 0,
+      "other": 0,
+      "total": 53.38
+    },
+    {
+      "date": "2026-10-29",
       "anthropic": 6.67,
       "elevenlabs": 0,
       "twilio": 0,
